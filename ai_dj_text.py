@@ -43,13 +43,16 @@ def genResponse(songX,nameX,songY,nameY,model,tokenizer):
 
 model,tokenizer=setupTextModel()
 
-with open("transitions.txt","r") as transitionFile:
-    for line in transitionFile:
-        lineElements=line.split("|")
-        songX=lineElements[0]
-        songY=lineElements[1]
-        nameX=lineElements[2]
-        nameY=lineElements[3].replace("\n","")#removes newline from end of data line
-        response=genResponse(songX,nameX,songY,nameY,model,tokenizer)
-        with open("responses.txt","a") as responseFile:
-            responseFile.write((response+"\n"))
+with open("transitions.txt","r") as transitionsFile:
+    transitionLines=transitionsFile.readlines()
+for line in transitionLines:
+    lineElements=line.split("|")
+    songX=lineElements[0]
+    songY=lineElements[1]
+    nameX=lineElements[2]
+    nameY=lineElements[3].replace("\n","")#removes newline from end of data line
+    response=genResponse(songX,nameX,songY,nameY,model,tokenizer).replace("\n","")
+    responseWrite=(songX+"|"+songY+"|"+response+"\n")
+    print("Writing:",responseWrite)
+    with open("responses.txt","a") as responseFile:
+        responseFile.write(responseWrite)

@@ -15,14 +15,20 @@ def getTags(songPath):
     except Exception as e:
         print(e)
         return None,None
+    
+def resetTxts():#clears files on new run
+    open(transitionsFile, 'w').close()
+    open(responsesFile, 'w').close()
 
 #main
-
+transitionsFile="transitions.txt"
+responsesFile="responses.txt"
+resetTxts()
 musicDir = "/appdata/Ajay/Music/" #dir containing mp3s to shuffle
 transitionSkips=1 #number of songs to iterate for transitions
 
 songs=os.listdir(musicDir)
-transitions=[["songX","songY","Hello world this is a speech test"]]
+transitions=[]
 for songIndex, songFile in enumerate(songs[:-1]):#iterates through until the last 2 songs (Final transition point)
     songX, nameX = (getTags(musicDir+songFile))#index
     songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
@@ -31,7 +37,7 @@ for songIndex, songFile in enumerate(songs[:-1]):#iterates through until the las
     print(songX,"by",nameX)
     print("to")
     print(songY,"by",nameY)
-    with open("transitions.txt","a") as transitionFile:
+    with open(transitionsFile,"a") as transitionFile:
         transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"\n"))
     subprocess.run("python3 /appdata/Ajay/AI-DJ/ai_dj_text.py",shell=True)#subprocess needed due to memory leak if func called then "cleaned up"
     transitions.append([songX,nameX,songY,nameY])
@@ -39,14 +45,18 @@ for songIndex, songFile in enumerate(songs[:-1]):#iterates through until the las
 print("_"*30)
 print("Generating Audio")
 audioModel, audioProcessor = ai_dj_audio.setupAudioModel()
-for transition in open("responses.txt","r").readlines():
-    songX="songX"
-    songY="songY"
+for response in (open(responsesFile,"r").readlines()):
+    print(response)
+    response=response.split("|")
+    print(response)
+    songX=response[0]
+    songY=response[1]
+    transitionText=response[2]
     
     print(songX,"->",songY)
-    print(transition)
+    print("Transition Text:",transitionText)
     
-    ai_dj_audio.generateAudio(transition,songX,songY,musicDir,audioModel,audioProcessor)
+    ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor)
 
     
 print("____________________")
