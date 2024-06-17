@@ -29,18 +29,17 @@ transitionSkips=1 #number of songs to iterate for transitions
 
 songs=os.listdir(musicDir)
 transitions=[]
+print("Transitioning from:")
 for songIndex, songFile in enumerate(songs[:-1]):#iterates through until the last 2 songs (Final transition point)
     songX, nameX = (getTags(musicDir+songFile))#index
     songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
 
     if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
-        print("Transitioning from:")
-        print(songX,"by",nameX)
-        print("to")
-        print(songY,"by",nameY)
+        print(songX,"by",nameX,"to",songY,"by",nameY)
         with open(transitionsFile,"a") as transitionFile:
             transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"\n"))
         transitions.append([songX,nameX,songY,nameY])
+print("Generating Text for",len(transitions),"transitions")
 subprocess.run("python3 /appdata/Ajay/AI-DJ/ai_dj_text.py",shell=True)#subprocess needed due to memory leak if func called then "cleaned up"
 
 
@@ -48,9 +47,7 @@ print("_"*30)
 print("Generating Audio")
 audioModel, audioProcessor = ai_dj_audio.setupAudioModel()
 for response in (open(responsesFile,"r").readlines()):
-    print(response)
     response=response.split("|")
-    print(response)
     songX=response[0]
     songY=response[1]
     transitionText=response[2]
