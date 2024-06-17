@@ -13,11 +13,11 @@ def setupAudioModel():
 def generateAudio(text,songX,songY,musicDir,model,processor):
     
     illegalChars=["/","\\",".","|"]#chars that can screw up the file output
-    outName=musicDir+"_Transition_"+songX+" - "+songY
+    outName="_Transition_"+songX+" - "+songY
     
     for illegalChar in illegalChars:
         outName=outName.replace(illegalChar," ")
-    outname=outname+".wav" #adds file extension afterwards so not affected by char removal
+    outName=musicDir+outName+".wav" #adds file extension afterwards so not affected by char removal
     
     print("Generating audio, outputting to",outName)
     voice_preset = "v2/en_speaker_8"
