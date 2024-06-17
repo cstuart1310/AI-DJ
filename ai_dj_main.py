@@ -33,15 +33,17 @@ for songIndex, songFile in enumerate(songs[:-1]):#iterates through until the las
     songX, nameX = (getTags(musicDir+songFile))#index
     songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
 
-    print("Transitioning from:")
-    print(songX,"by",nameX)
-    print("to")
-    print(songY,"by",nameY)
-    with open(transitionsFile,"a") as transitionFile:
-        transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"\n"))
-    subprocess.run("python3 /appdata/Ajay/AI-DJ/ai_dj_text.py",shell=True)#subprocess needed due to memory leak if func called then "cleaned up"
-    transitions.append([songX,nameX,songY,nameY])
-    
+    if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
+        print("Transitioning from:")
+        print(songX,"by",nameX)
+        print("to")
+        print(songY,"by",nameY)
+        with open(transitionsFile,"a") as transitionFile:
+            transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"\n"))
+        transitions.append([songX,nameX,songY,nameY])
+subprocess.run("python3 /appdata/Ajay/AI-DJ/ai_dj_text.py",shell=True)#subprocess needed due to memory leak if func called then "cleaned up"
+
+
 print("_"*30)
 print("Generating Audio")
 audioModel, audioProcessor = ai_dj_audio.setupAudioModel()
@@ -55,7 +57,6 @@ for response in (open(responsesFile,"r").readlines()):
     
     print(songX,"->",songY)
     print("Transition Text:",transitionText)
-    
     ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor)
 
     
