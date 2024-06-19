@@ -12,7 +12,13 @@ def setupAudioModel():
 
 def generateAudio(text,songX,songY,musicDir,model,processor):
     
-    outName=musicDir+"_Transition_"+songX+" - "+songY+".wav"
+    illegalChars=["/","\\",".","|","!"]#chars that can screw up the file output
+    outName="_Transition_"+songX+" - "+songY
+    
+    for illegalChar in illegalChars:
+        outName=outName.replace(illegalChar," ")
+    outName=outName+".wav" #adds file extension afterwards so not affected by char removal
+    
     print("Generating audio, outputting to",outName)
     voice_preset = "v2/en_speaker_8"
     # Process input text
@@ -32,5 +38,5 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
 
     # Get the sample rate and save the file
     sample_rate = model.generation_config.sample_rate
-    wavfile.write(outName, rate=sample_rate, data=audio_array)
-    return outName
+    wavfile.write(musicDir+outName, rate=sample_rate, data=audio_array)
+    return outName #returns the filename (Not full path)
