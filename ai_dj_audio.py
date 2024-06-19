@@ -1,6 +1,8 @@
 from transformers import AutoProcessor, BarkModel
 from scipy.io import wavfile
-import torch
+from pydub import AudioSegment#audio concating
+import os
+
 
 def setupAudioModel():
 
@@ -23,11 +25,7 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
     voice_preset = "v2/en_speaker_8"
     # Process input text
     inputs = processor(text, voice_preset=voice_preset, return_tensors="pt")
-
-    # Ensure inputs are on the correct device
-    inputs = {key: value.to("cuda") for key, value in inputs.items()}
-
-    # Generate audio without mixed precision
+    inputs = {key: value.to("cuda") for key, value in inputs.items()}    # Ensure inputs are on the correct device
     audio_array = model.generate(**inputs)
 
     # Move audio array to CPU and convert to float32 numpy array
@@ -40,3 +38,31 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
     sample_rate = model.generation_config.sample_rate
     wavfile.write(musicDir+outName, rate=sample_rate, data=audio_array)
     return outName #returns the filename (Not full path)
+
+def concatAudio(playbackOrder,musicDir):#concats audio files and exports as one
+    print("Joining audio files")
+    printPlaybackOrder(playbackOrder)
+    blendDuration=500 #milliseconds to blend between songs
+    combined = AudioSegment.empty() #init combination of audio
+
+    for audioIndex, audioFile in enumerate(playbackOrder): #for each file in musicDir (Incl transitions)
+        audioFile=musicDir+audioFile #Adds full path to filename
+        print(audioFile)
+        audioExtension = os.path.splitext(audioFile)[1].lower()
+        
+        if audioExtension == ".mp3":
+            audio = AudioSegment.from_mp3(audioFile)
+        elif audioExtension == ".wav":
+            audio = AudioSegment.from_wav(audioFile)
+        else:
+            print("Unsupported filetype:",audioFile)
+        if audioIndex == 0: #first audio file begins the out file
+            combined = audio
+        else: #any audio files from index 1: are concated
+            combined = combined.append(audio, crossfade=blendDuration)
+            combined.export("Ajay_Radio.mp3", format="mp3")#exports the file as an mp3
+            
+def printPlaybackOrder(playbackOrder):
+    print("Playback Order:")
+    for audioIndex, audioFile in enumerate(playbackOrder):
+        print(str(audioIndex+1)+"."+audioFile)
