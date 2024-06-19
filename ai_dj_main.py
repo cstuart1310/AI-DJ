@@ -32,7 +32,7 @@ def generateTransitionName(songX,songY):
 def concatAudio(playbackOrder):#concats audio files and exports as one
     print("Joining audio files")
     printPlaybackOrder(playbackOrder)
-    blendDuration=2000 #milliseconds to blend between songs
+    blendDuration=500 #milliseconds to blend between songs
     combined = AudioSegment.empty() #init combination of audio
 
     for audioIndex, audioFile in enumerate(playbackOrder): #for each file in musicDir (Incl transitions)
