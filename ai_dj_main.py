@@ -80,16 +80,15 @@ resetTxts()
 songs=os.listdir(musicDir)
 playbackOrder=[]#array of order of audios to play, starts empty so can skip untagged mp3s
 if shuffleSongs:
-    songs = random.shuffle(songs)#shuffles order if wanted
+    print("Shuffled songs")
+    random.shuffle(songs)#shuffles order if wanted
 
 for songIndex, songFile in enumerate(songs):#iterates through until the last 2 songs (Final transition point)
-    
     if songIndex+1<len(songs):#while there is one song in front of the index location
         songX, nameX = (getTags(musicDir+songFile))#index
         songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
         if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
             print("Transitioning from:",songX,"by",nameX,"to",songY,"by",nameY)
-            print("playback len",len(playbackOrder))
             playbackOrder.append(songFile)
             transitionName=generateTransitionName(songX,songY)
             playbackOrder.append(transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
