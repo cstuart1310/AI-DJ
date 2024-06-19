@@ -51,9 +51,10 @@ for line in transitionLines:
     songX=lineElements[0]
     songY=lineElements[1]
     nameX=lineElements[2]
-    nameY=lineElements[3].replace("\n","")#removes newline from end of data line
+    nameY=lineElements[3]
+    audioFileName=lineElements[4].replace("\n","")#removes newline from end of line
     response=genResponse(songX,nameX,songY,nameY,model,tokenizer).replace("\n","")
-    responseWrite=(songX+"|"+songY+"|"+response+"\n")
+    responseWrite=(songX+"|"+songY+"|"+response+"|"+audioFileName+"\n")
     print("Writing:",responseWrite)
     with open("responses.txt","a") as responseFile:
         responseFile.write(responseWrite)
