@@ -39,7 +39,7 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
     wavfile.write(musicDir+outName, rate=sample_rate, data=audio_array)
     return outName #returns the filename (Not full path)
 
-def concatAudio(playbackOrder,musicDir):#concats audio files and exports as one
+def concatAudio(playbackOrder,musicDir,outputDir):#concats audio files and exports as one
     print("Joining audio files")
     printPlaybackOrder(playbackOrder)
     blendDuration=500 #milliseconds to blend between songs
@@ -60,7 +60,7 @@ def concatAudio(playbackOrder,musicDir):#concats audio files and exports as one
             combined = audio
         else: #any audio files from index 1: are concated
             combined = combined.append(audio, crossfade=blendDuration)
-            combined.export("Ajay_Radio.mp3", format="mp3")#exports the file as an mp3
+            combined.export((outputDir+"Ajay_Radio.mp3"), format="mp3")#exports the file as an mp3
             
 def printPlaybackOrder(playbackOrder):
     print("Playback Order:")

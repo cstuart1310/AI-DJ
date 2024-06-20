@@ -46,9 +46,13 @@ musicDir = args.music  # dir containing mp3s
 intermissionless = args.intermissionless
 shuffleSongs = args.shuffle
 songLength=args.length
+outputDir=args.output
 
 if musicDir.split()[-1] !="/":
     musicDir=musicDir+"/"
+    
+if outputDir.split()[-1] !="/":
+    outputDir=outputDir+"/"
 
 print("Music Directory:",musicDir)
 print("Songs between intermissions:",intermissionless)
@@ -57,6 +61,7 @@ print("Shuffle playlist?:",shuffleSongs)
 #main
 transitionsFile=cwd+"/transitions.txt"
 responsesFile=cwd+"/responses.txt"
+audioExtensions=[".mp3",".wav"]#array of valid audio file extensions
 resetTxts()
 
 songs=os.listdir(musicDir)
@@ -68,21 +73,20 @@ if shuffleSongs:
 if songLength==None:#If song length is default value
     songLength=len(songs)#replaces None with length of array so all songs are iterated through
 
-for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the chosen number of songs
-    print(musicDir+songFile)
-    if os.path.isdir(musicDir+songFile)==False:#check to make sure song file isn't actually a dir
-        if songIndex+1<len(songs):#while there is one song in front of the index location (Allowing for a transition)
-            songX, nameX = (getTags(musicDir+songFile))#index
-            songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
-            if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
-                print("Transitioning from:",songX,"by",nameX,"to",songY,"by",nameY)
-                playbackOrder.append(songFile)
-                transitionName=generateTransitionName(songX,songY)
-                playbackOrder.append(transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
-                with open(transitionsFile,"a") as transitionFile:
-                    transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"|"+transitionName+"\n"))#writes song names and artist names to txt for passing to other script
-        else:#final song in the array
-            playbackOrder.append(songFile)#adds final song to end of array
+for songIndex, songFile in enumerate(songs[0:]):#iterates through the chosen number of songs
+        if os.path.isdir(musicDir+songFile)==False and os.path.splitext(songFile)[1].lower() in audioExtensions:#checks to make sure file is a valid audio file (Also filters out subdirs)
+            if songIndex+1<len(songs):#while there is one song in front of the index location (Allowing for a transition)
+                songX, nameX = (getTags(musicDir+songFile))#index
+                songY, nameY = (getTags(musicDir+songs[songIndex+1]))#next in list after index
+                if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
+                    print("Transitioning from:",songX,"by",nameX,"to",songY,"by",nameY)
+                    playbackOrder.append(songFile)
+                    transitionName=generateTransitionName(songX,songY)
+                    playbackOrder.append(transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
+                    with open(transitionsFile,"a") as transitionFile:
+                        transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"|"+transitionName+"\n"))#writes song names and artist names to txt for passing to other script
+            else:#final song in the array
+                playbackOrder.append(songFile)#adds final song to end of array
             
 subprocess.run(("python3 "+cwd+"/ai_dj_text.py"),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up". Text generated is outputted to txt
 
@@ -102,4 +106,4 @@ for response in (open(responsesFile,"r").readlines()):#for each line of ai gener
     ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor)#generates audio as mp3
 print("_"*30)
 
-ai_dj_audio.concatAudio(playbackOrder,musicDir)
+ai_dj_audio.concatAudio(playbackOrder,musicDir,outputDir)
