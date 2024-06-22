@@ -60,7 +60,12 @@ def concatAudio(playbackOrder,musicDir,outputDir):#concats audio files and expor
             combined = audio
         else: #any audio files from index 1: are concated
             combined = combined.append(audio, crossfade=blendDuration)
-            combined.export((outputDir+"Ajay_Radio.mp3"), format="mp3")#exports the file as an mp3
+            
+            if os.path.isdir(outputDir)==False:
+                os.makedirs(outputDir)
+            exportPath=outputDir+"Ajay_Radio.mp3"
+            combined.export(exportPath, format="mp3")#exports the file as an mp3
+            print("Exported to:",exportPath)
             
 def printPlaybackOrder(playbackOrder):
     print("Playback Order:")
