@@ -63,6 +63,7 @@ transitionsFile=cwd+"/transitions.txt"
 responsesFile=cwd+"/responses.txt"
 audioExtensions=[".mp3",".wav"]#array of valid audio file extensions
 resetTxts()
+cleanupFiles=[]#files to delete after processing
 
 songs=os.listdir(musicDir)
 playbackOrder=[]#array of order of audios to play, starts empty so can skip untagged mp3s
@@ -104,6 +105,11 @@ for response in (open(responsesFile,"r").readlines()):#for each line of ai gener
     print("Transition Text:",transitionText)
     print("Transition file name:")
     ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor)#generates audio as mp3
+    cleanupFiles.append(ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor))#generates audio as mp3, and appends it to be deleted later
+    
 print("_"*30)
 
-ai_dj_audio.concatAudio(playbackOrder,musicDir,outputDir)
+ai_dj_audio.concatAudio(playbackOrder,musicDir,outputDir)print("Cleaning up!")
+for cleanupFile in cleanupFiles:
+    print("Deleting:",cleanupFile)
+    os.remove(cleanupFile)

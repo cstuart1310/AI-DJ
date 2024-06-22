@@ -37,7 +37,8 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
     # Get the sample rate and save the file
     sample_rate = model.generation_config.sample_rate
     wavfile.write(musicDir+outName, rate=sample_rate, data=audio_array)
-    return outName #returns the filename (Not full path)
+    
+    return (musicDir+outName) #returns the filename (Not full path)
 
 def concatAudio(playbackOrder,musicDir,outputDir):#concats audio files and exports as one
     print("Joining audio files")
