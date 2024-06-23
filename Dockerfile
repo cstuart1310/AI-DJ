@@ -22,7 +22,8 @@ ARG HUGGINGFACE_KEY=1234
 # Copies rest of repo into the container
 COPY . .
 
-RUN python3 -c 'from huggingface_hub import HfFolder; HfFolder.save_token("<${HUGGINGFACE_KEY}>")'
-# RUN huggingface-cli login $HUGGINGFACE_KEY
+RUN huggingface-cli login --token $HUGGINGFACE_KEY
+RUN huggingface-cli whoami
+
 # Runs the main command, allowing for args to be passed through
 ENTRYPOINT ["python3", "ai_dj_main.py"]
