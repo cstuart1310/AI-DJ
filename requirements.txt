@@ -1,0 +1,7 @@
+transformers
+mutagen
+pydub
+scipy
+accelerate
+optimum
+auto-gptq
