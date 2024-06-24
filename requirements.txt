@@ -1,0 +1,8 @@
+transformers
+mutagen
+pydub
+scipy
+accelerate
+optimum
+auto-gptq
+huggingface_hub[cli]
