@@ -59,6 +59,7 @@ if outputDir.split()[-1] !="/":
 
 print("Music Directory:",musicDir)
 print("Songs between intermissions:",intermissions)
+print("Number of files to process:",songLength)
 print("Shuffle playlist?:",shuffleSongs)
 
 #main
@@ -75,10 +76,10 @@ if shuffleSongs:
     print("Songs have been shuffled")
     random.shuffle(songs)#shuffles order if wanted
 
-if songLength==None:#If song length is default value
+if songLength==None or songLength>len(songs):#If song length is default value or greater than allowed
     songLength=len(songs)#replaces None with length of array so all songs are iterated through
 
-for songIndex, songFile in enumerate(songs[0:]):#iterates through the chosen number of songs
+for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the chosen number of songs
         if os.path.isdir(musicDir+songFile)==False and os.path.splitext(songFile)[1].lower() in audioExtensions:#checks to make sure file is a valid audio file (Also filters out subdirs)
             if songIndex+intermissions<len(songs):#while there is songs enough for another intermission
                 songX, nameX = (getTags(musicDir+songFile))#tags of songindex
