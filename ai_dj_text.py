@@ -46,7 +46,9 @@ revisionName = "main"
 model,tokenizer=setupTextModel(modelName,revisionName)
 with open("transitions.txt","r") as transitionsFile:
     transitionLines=transitionsFile.readlines()
-for line in transitionLines:
+lenLines=str(len(transitionLines))#gets the len as a var so doesnt process 80 times
+for lineCount,line in enumerate(transitionLines):
+    print("Prompt "+str(lineCount+1)+"/"+lenLines)
     lineElements=line.split("|")
     songX=lineElements[0]
     songY=lineElements[1]
