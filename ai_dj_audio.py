@@ -5,11 +5,13 @@ import os
 
 
 def setupAudioModel():
-
+    print("_"*30)
+    print("Setting up audio model")
     # Load processor and model
     processor = AutoProcessor.from_pretrained("suno/bark")
     model = BarkModel.from_pretrained("suno/bark").to("cuda")
     model = model.to_bettertransformer()
+    print("_"*30)
     return model,processor
 
 def generateAudio(text,songX,songY,musicDir,model,processor):
@@ -47,7 +49,6 @@ def concatAudio(playbackOrder,musicDir,outputDir):#concats audio files and expor
     combined = AudioSegment.empty() #init combination of audio
 
     for audioIndex, audioFile in enumerate(playbackOrder): #for each file in musicDir (Incl transitions)
-        audioFile=musicDir+audioFile #Adds full path to filename
         print(audioFile)
         audioExtension = os.path.splitext(audioFile)[1].lower()
         

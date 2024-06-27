@@ -41,7 +41,7 @@ def getSongs(musicDir,searchSubdirs):
     elif searchSubdirs==False:#Only looks through given path for songs
         songs=os.listdir(musicDir)#lists songs in given dir
 
-    print(len(songs),"found in",musicDir)
+    print(len(songs),"songs found in",musicDir)
     if len(songs)<2:
         print("Minimum songs for processing is 2. Exiting program.")
         quit()#kills the program as no processing to be done without songs
@@ -110,7 +110,7 @@ for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the 
                     print("Transitioning from:",songX,"by",nameX," ---> ",songY,"by",nameY)
                     playbackOrder.append(songFile)
                     transitionName=generateTransitionName(songX,songY)
-                    playbackOrder.append(transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
+                    playbackOrder.append(musicDir+transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
                     with open(transitionsFile,"a") as transitionFile:
                         transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"|"+transitionName+"\n"))#writes song names and artist names to txt for passing to other script
             else:#final song in array or final song that can fit a transition
@@ -118,7 +118,6 @@ for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the 
                     print("Can't fit any more transitions, adding",songFile,"to playback list")
                     playbackOrder.append(songFile)#adds songs to playback order without generating transitions
                 break#breaks the main loop of songs
-            
 subprocess.run(("python3 "+cwd+"/ai_dj_text.py"),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up". Text generated is outputted to txt
 
 print("_"*30)

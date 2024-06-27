@@ -2,6 +2,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 def setupTextModel(modelName,revisionName):
+    print("_"*30)
     print("Setting up text model...")
     try:#if the models can be found locally
         model = AutoModelForCausalLM.from_pretrained(modelName, local_files_only=True,revision=revisionName,device_map="auto",trust_remote_code=False)
@@ -10,7 +11,8 @@ def setupTextModel(modelName,revisionName):
         print("Model'",modelName,"'with revision'",revisionName,"'is not found locally. Downloading now. This may take some time but only needs to be done once")
         model = AutoModelForCausalLM.from_pretrained(modelName,local_files_only=False,device_map="auto",trust_remote_code=False,revision=revisionName)
         tokenizer = AutoTokenizer.from_pretrained(modelName, use_fast=True)
-        
+    
+    print("_"*30)
     return model, tokenizer#returns the successfully downloaded/loaded model and tokenizer
 
 def genResponse(songX,nameX,songY,nameY,model,tokenizer):#generates a text response using the chosen model
@@ -39,6 +41,7 @@ def genResponse(songX,nameX,songY,nameY,model,tokenizer):#generates a text respo
 
 
 #change these to any LLM you want to test from huggingface
+print("_"*30)
 print("AI-DJ Text generator")
 modelName = "TheBloke/storytime-13B-GPTQ"
 revisionName = "main"
