@@ -28,7 +28,25 @@ def generateTransitionName(songX,songY):
     outName=outName+".wav" #adds file extension afterwards so not affected by char removal
     return outName
 
+def getSongs(musicDir,searchSubdirs):
+    print("Searching for songs")
+    songs=[]#init array in case returns no songs    
+    
+    if searchSubdirs==True:#searches through subdirs for songs
+        for currentPath, subdirs, filesInCurrentPath in os.walk(musicDir):#loops through each subdir
+            for song in filesInCurrentPath:#for each file in the subdir
+                if song.endswith(".mp3"):#if file is an mp3
+                    songs.append(os.path.join(currentPath,song))
+    
+    elif searchSubdirs==False:#Only looks through given path for songs
+        songs=os.listdir(musicDir)#lists songs in given dir
 
+    print(len(songs),"found in",musicDir)
+    if len(songs)<2:
+        print("Minimum songs for processing is 2. Exiting program.")
+        quit()#kills the program as no processing to be done without songs
+    return songs #Returns a non-empty array of songs
+        
     
 
 
@@ -38,7 +56,8 @@ cwd=os.getcwd() #dir containing this script (And hopefully the others)
 argparser=argparse.ArgumentParser()
 argparser.add_argument("--music",default="/Music/",help="Directory containing songs to transition between")
 argparser.add_argument("--intermissions",type=int,default=1,help="Number of songs to play before an intermission")
-argparser.add_argument("--shuffle",default=False,help="Shuffle the order of songs before generating radio, or keep them in alphabetical order")
+argparser.add_argument("--shuffle",default=False,action=argparse.BooleanOptionalAction,help="Shuffle the order of songs before generating radio, or keep them in alphabetical order")
+argparser.add_argument("--subdirs",default=False,action=argparse.BooleanOptionalAction,help="Whether or not to dig through subdirs of music path to find songs")
 argparser.add_argument("--output",default=cwd)
 argparser.add_argument("--length",default=None,type=int,help="Number of songs to process out of those found in the given directory")
 args=argparser.parse_args()
@@ -46,21 +65,23 @@ args=argparser.parse_args()
 musicDir = args.music  # dir containing mp3s
 intermissions = args.intermissions
 shuffleSongs = args.shuffle
-songLength=args.length
 outputDir=args.output
+songLength=args.length
+searchSubdirs=args.subdirs
 
-
-
+#adds / to end of dir path if not already there by user
 if musicDir.split()[-1] !="/":
     musicDir=musicDir+"/"
     
 if outputDir.split()[-1] !="/":
     outputDir=outputDir+"/"
 
+#shows arg values
 print("Music Directory:",musicDir)
 print("Songs between intermissions:",intermissions)
 print("Number of files to process:",songLength)
 print("Shuffle playlist?:",shuffleSongs)
+print("Search subdirs?:",searchSubdirs)
 
 #main
 transitionsFile=cwd+"/transitions.txt"
@@ -70,9 +91,10 @@ cleanupFiles=[]#files to delete after processing
 
 resetTxts()#clears text files
 
-songs=os.listdir(musicDir)#lists songs in given dir
+songs=getSongs(musicDir,searchSubdirs)
+    
 playbackOrder=[]#array of order of audios to play, starts empty so can skip untagged mp3s
-if shuffleSongs:
+if shuffleSongs==True:
     print("Songs have been shuffled")
     random.shuffle(songs)#shuffles order if wanted
 
@@ -80,12 +102,12 @@ if songLength==None or songLength>len(songs):#If song length is default value or
     songLength=len(songs)#replaces None with length of array so all songs are iterated through
 
 for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the chosen number of songs
-        if os.path.isdir(musicDir+songFile)==False and os.path.splitext(songFile)[1].lower() in audioExtensions:#checks to make sure file is a valid audio file (Also filters out subdirs)
+        if os.path.splitext(songFile)[1].lower() in audioExtensions:#checks to make sure file is a valid audio file (Also filters out subdirs)
             if songIndex+intermissions<len(songs):#while there is songs enough for another intermission
-                songX, nameX = (getTags(musicDir+songFile))#tags of songindex
-                songY, nameY = (getTags(musicDir+songs[songIndex+1]))#tags of next in list after index
+                songX, nameX = (getTags(songFile))#tags of songindex
+                songY, nameY = (getTags(songs[songIndex+1]))#tags of next in list after index
                 if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
-                    print("Transitioning from:",songX,"by",nameX,"to",songY,"by",nameY)
+                    print("Transitioning from:",songX,"by",nameX," ---> ",songY,"by",nameY)
                     playbackOrder.append(songFile)
                     transitionName=generateTransitionName(songX,songY)
                     playbackOrder.append(transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
