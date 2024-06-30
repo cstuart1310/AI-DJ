@@ -6,15 +6,15 @@ import argparse #args
 import random #shuffling
 
 
-def getTags(songPath):
+def getTags(songPath):#gets metadata tags from an mp3
     try:
         audio = EasyID3(songPath)
-        title = audio.get("title", [None])[0]
-        artist = audio.get("artist", [None])[0]
+        title = audio.get("title", [None])[0]#gets title tag, returns None if not found
+        artist = audio.get("artist", [None])[0]#gets artist tag, returns None if not found
         return title, artist
-    except Exception as e:
+    except Exception as e:#if any errors found (I Should specify this eventually)
         print(e)
-        return None,None
+        return None,None #Returns same value as if no tags found
     
 def resetTxts():#clears files on new run
     open(transitionsFile, 'w').close()
@@ -49,9 +49,9 @@ def getSongs(musicDir,searchSubdirs):
         
     
 
-
-#args
+#_____main_____
 cwd=os.getcwd() #dir containing this script (And hopefully the others)
+#args
 
 argparser=argparse.ArgumentParser()
 argparser.add_argument("--music",default="/Music/",help="Directory containing songs to transition between")
@@ -83,24 +83,23 @@ print("Number of files to process:",songLength)
 print("Shuffle playlist?:",shuffleSongs)
 print("Search subdirs?:",searchSubdirs)
 
-#main
+#vars/setup
 transitionsFile=cwd+"/transitions.txt"
 responsesFile=cwd+"/responses.txt"
 audioExtensions=[".mp3",".wav"]#array of valid audio file extensions
 cleanupFiles=[]#files to delete after processing
-
 resetTxts()#clears text files
-
 songs=getSongs(musicDir,searchSubdirs)
-    
 playbackOrder=[]#array of order of audios to play, starts empty so can skip untagged mp3s
+
 if shuffleSongs==True:
     print("Songs have been shuffled")
     random.shuffle(songs)#shuffles order if wanted
 
 if songLength==None or songLength>len(songs):#If song length is default value or greater than allowed
     songLength=len(songs)#replaces None with length of array so all songs are iterated through
-    
+
+#main loop    
 for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the chosen number of songs
         if os.path.splitext(songFile)[1].lower() in audioExtensions:#checks to make sure file is a valid audio file (Also filters out subdirs)
             if songIndex+intermissions<len(songs) and songIndex+1<songLength:#while there is songs enough for another intermission, and not too many to be out of the range
@@ -108,23 +107,22 @@ for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the 
                 songY, nameY = (getTags(songs[songIndex+1]))#tags of next in list after index
                 if all(noneCheck is not None for noneCheck in [songX,songY,nameX,nameY]):#if all vars have a non-none value
                     print("Transitioning from:",songX,"by",nameX," ---> ",songY,"by",nameY)
-                    playbackOrder.append(songFile)
-                    transitionName=generateTransitionName(songX,songY)
-                    playbackOrder.append(musicDir+transitionName) #inserts transition file name between index pointer and index+1 (between songXs and songY)
+                    playbackOrder.append(songFile)#adds songX to playback (SongY is added on next loop when it becomes songX)
+                    transitionName=generateTransitionName(songX,songY)#creates transition name
+                    playbackOrder.append(musicDir+transitionName) #adds transition to playback order
                     with open(transitionsFile,"a") as transitionFile:
                         transitionFile.write((songX+"|"+songY+"|"+nameX+"|"+nameY+"|"+transitionName+"\n"))#writes song names and artist names to txt for passing to other script
             else:#final song in array or final song that can fit a transition
-                print("Can't fit any more transitions/songs, adding",songFile,"to playback list")
+                print("Can't fit any more transitions/songs. Adding",songFile,"to playback list")
                 playbackOrder.append(songFile)#adds songs to playback order without generating transitions
                 
+#_____text generation_____
+subprocess.run(("python3 "+cwd+"/ai_dj_text.py"),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up"(https://github.com/huggingface/transformers/issues/21094). Text generated is outputted to txt
 
-ai_dj_audio.printPlaybackOrder(playbackOrder)
-subprocess.run(("python3 "+cwd+"/ai_dj_text.py"),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up". Text generated is outputted to txt
-
+#_____audio generation_____
 print("_"*30)
 print("Generating Audio")
 audioModel, audioProcessor = ai_dj_audio.setupAudioModel()#can use ai_dj_audio as a lib as no memory leak issue
-
 
 for response in (open(responsesFile,"r").readlines()):#for each line of ai generated text
     response=response.split("|")#lines also contain song names in format: songX | songY | generatedText | audioFileName
@@ -134,13 +132,14 @@ for response in (open(responsesFile,"r").readlines()):#for each line of ai gener
     audioFileName=response[3]
     
     print(songX,"->",songY)
-    print("Transition Text:",transitionText)
-    print("Transition file name:")
+    print("Transition Text:",transitionText,"\n")
     cleanupFiles.append(ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor))#generates audio as mp3, and appends it to be deleted later
-    
-print("_"*30)
-ai_dj_audio.concatAudio(playbackOrder,musicDir,outputDir)
 
+#_____concat audio_____    
+print("_"*30)
+ai_dj_audio.concatAudio(playbackOrder,musicDir,outputDir)#combines the audio files from the playback order into a single mp3
+
+#_____cleanup_____
 print("Cleaning up!")
 for cleanupFile in cleanupFiles:
     print("Deleting:",cleanupFile)
