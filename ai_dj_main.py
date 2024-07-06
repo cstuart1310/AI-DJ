@@ -39,7 +39,9 @@ def getSongs(musicDir,searchSubdirs):
                     songs.append(os.path.join(currentPath,song))
     
     elif searchSubdirs==False:#Only looks through given path for songs
-        songs=os.listdir(musicDir)#lists songs in given dir
+        filenames=os.listdir(musicDir)#lists songs in given dir
+        for songFile in filenames:#For all songs found (something.mp3)
+            songs.append(os.path.join(musicDir,songFile))#Adds location to song (/Music/something.mp3)
 
     print(len(songs),"songs found in",musicDir)
     if len(songs)<2:
