@@ -62,6 +62,7 @@ argparser.add_argument("--shuffle",default=False,action=argparse.BooleanOptional
 argparser.add_argument("--subdirs",default=False,action=argparse.BooleanOptionalAction,help="Whether or not to dig through subdirs of music path to find songs")
 argparser.add_argument("--output",default=cwd)
 argparser.add_argument("--length",default=None,type=int,help="Number of songs to process out of those found in the given directory")
+argparser.add_argument("--temperature",default=0.7,type=float,help="LLM Temperature. A value between 0.1 and 1 reflecting the creativity of the responses. Defaults to 0.95")
 args=argparser.parse_args()
 
 musicDir = args.music  # dir containing mp3s
@@ -70,6 +71,7 @@ shuffleSongs = args.shuffle
 outputDir=args.output
 songLength=args.length
 searchSubdirs=args.subdirs
+modelTemperature=args.temperature
 
 #adds / to end of dir path if not already there by user
 if musicDir.split()[-1] !="/":
@@ -119,7 +121,7 @@ for songIndex, songFile in enumerate(songs[0:songLength]):#iterates through the 
                 playbackOrder.append(songFile)#adds songs to playback order without generating transitions
                 
 #_____text generation_____
-subprocess.run(("python3 "+cwd+"/ai_dj_text.py"),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up"(https://github.com/huggingface/transformers/issues/21094). Text generated is outputted to txt
+subprocess.run(("python3 "+cwd+"/ai_dj_text.py --temperature "+str(modelTemperature)),shell=True)#Runs the text generator via subprocess. Subprocess needed due to memory leak if func called then "cleaned up"(https://github.com/huggingface/transformers/issues/21094). Text generated is outputted to txt
 
 #_____audio generation_____
 print("_"*30)
