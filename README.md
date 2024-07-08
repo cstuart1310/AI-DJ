@@ -45,17 +45,21 @@ Run the docker image, passing into it the path for models to download to/current
 ```docker run -v /path/to/music:/Music -v /path/to/models/:/root/.cache/huggingface/hub --gpus all ai-dj ```
 
 ## Command-Line Arguments
-* ```--music /path/to/music``` The directory containing MP3s to transition between (Default: /Music)
+* ```--music /path/to/music``` The directory containing MP3s to transition between (Default: /Music/)
 
 * ```--intermissions 1/2/3/...``` The number of songs to play before an intermission. (Default: 1)
 
-* ```--shuffle``` Shuffles the order of the files from the music folder
+* ```--shuffle``` Shuffles the order of the song files from the music folder for playback.
 
-* ```--output /path/to/output``` The directory to output the combined MP3 of transitions and songs to
+* ```--output /path/to/output``` The directory to output the combined MP3 of transitions and songs to.
 
-* ```--length 1/2/3/...``` The number of songs to process from the given directory
+* ```--length 1/2/3/...``` The number of songs to process from the given directory. Gets reduced to the maximum found if this argument is larger than the no of available songs.
 
-* ```--subdirs``` Searches subdirs of the music dir for mp3's, as opposed to just the given music dir
+* ```--subdirs / --no-subdirs``` Searches subdirs of the music dir for mp3's, as opposed to just the given music dir. Defaults to no-subdirs
+
+* ```--temperature 0.1 - 1``` The temperature used for text generation (Essentially the creativity allowed for the model). Values around 0.7 seem to work best.
+
+* ```--voice voicePromptName``` The voice used for audio generation. Voices can be found at https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c
 
 ### Example run with arguments
 #### Local run: 

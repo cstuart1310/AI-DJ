@@ -56,14 +56,14 @@ cwd=os.getcwd() #dir containing this script (And hopefully the others)
 #args
 
 argparser=argparse.ArgumentParser()
-argparser.add_argument("--music",default="/Music/",help="Directory containing songs to transition between")
-argparser.add_argument("--intermissions",type=int,default=1,help="Number of songs to play before an intermission")
+argparser.add_argument("--music",default="/Music/",help="Directory containing songs to transition between. Defaults to /Music/ (Useful for docker container)")
+argparser.add_argument("--intermissions",type=int,default=1,help="Number of songs to play before an intermission. Defaults to 1 (Song A, transition, Song B)")
 argparser.add_argument("--shuffle",default=False,action=argparse.BooleanOptionalAction,help="Shuffle the order of songs before generating radio, or keep them in alphabetical order")
 argparser.add_argument("--subdirs",default=False,action=argparse.BooleanOptionalAction,help="Whether or not to dig through subdirs of music path to find songs")
 argparser.add_argument("--output",default=cwd)
 argparser.add_argument("--length",default=None,type=int,help="Number of songs to process out of those found in the given directory")
 argparser.add_argument("--temperature",default=0.7,type=float,help="LLM Temperature. A value between 0.1 and 1 reflecting the creativity of the responses. Defaults to 0.95")
-argparser.add_argument("--voice",default="v2/en_speaker_8",help="Voice preset for audio generation. Voices can be found at: https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c")
+argparser.add_argument("--voice",default="v2/en_speaker_8",help="Voice preset for audio generation. Defaults to en_speaker_8. Voices can be found at: https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c")
 args=argparser.parse_args()
 
 musicDir = args.music  # dir containing mp3s
