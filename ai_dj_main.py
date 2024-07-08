@@ -63,6 +63,7 @@ argparser.add_argument("--subdirs",default=False,action=argparse.BooleanOptional
 argparser.add_argument("--output",default=cwd)
 argparser.add_argument("--length",default=None,type=int,help="Number of songs to process out of those found in the given directory")
 argparser.add_argument("--temperature",default=0.7,type=float,help="LLM Temperature. A value between 0.1 and 1 reflecting the creativity of the responses. Defaults to 0.95")
+argparser.add_argument("--voice",default="v2/en_speaker_8",help="Voice preset for audio generation. Voices can be found at: https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c")
 args=argparser.parse_args()
 
 musicDir = args.music  # dir containing mp3s
@@ -72,6 +73,7 @@ outputDir=args.output
 songLength=args.length
 searchSubdirs=args.subdirs
 modelTemperature=args.temperature
+voicePreset=args.voice
 
 #adds / to end of dir path if not already there by user
 if musicDir.split()[-1] !="/":
@@ -137,7 +139,7 @@ for response in (open(responsesFile,"r").readlines()):#for each line of ai gener
     
     print(songX,"->",songY)
     print("Transition Text:",transitionText,"\n")
-    cleanupFiles.append(ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor))#generates audio as mp3, and appends it to be deleted later
+    cleanupFiles.append(ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor,voicePreset))#generates audio as mp3, and appends it to be deleted later
 
 #_____concat audio_____    
 print("_"*30)

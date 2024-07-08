@@ -14,7 +14,7 @@ def setupAudioModel():
     print("_"*30)
     return model,processor
 
-def generateAudio(text,songX,songY,musicDir,model,processor):
+def generateAudio(text,songX,songY,musicDir,model,processor,voice):
     
     illegalChars=["/","\\",".","|","!"]#chars that can screw up the file output
     outName="_Transition_"+songX+" - "+songY
@@ -24,9 +24,8 @@ def generateAudio(text,songX,songY,musicDir,model,processor):
     outName=outName+".wav" #adds file extension afterwards so not affected by char removal
     
     print("Generating audio, outputting to",outName)
-    voice_preset = "v2/en_speaker_8"
     # Process input text
-    inputs = processor(text, voice_preset=voice_preset, return_tensors="pt")
+    inputs = processor(text, voice_preset=voice, return_tensors="pt")
     inputs = {key: value.to("cuda") for key, value in inputs.items()}    # Ensure inputs are on the correct device
     audio_array = model.generate(**inputs)
 
