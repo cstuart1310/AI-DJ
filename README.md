@@ -1,5 +1,6 @@
 # Ajay - (AI-DJ)
 Generates a custom radio show with realistic speech transitions between songs.
+*Questions? Comments? Job opportunities? Contact me: https://linkedin.callumstuart.com*
 
 **Currently Proof of Concept, and very VERY early in development**
 
