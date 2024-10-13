@@ -4,6 +4,7 @@ import os #file ops
 import subprocess
 import argparse #args
 import random #shuffling
+import csv #user data reading
 
 
 def getTags(songPath):#gets metadata tags from an mp3
@@ -50,6 +51,20 @@ def getSongs(musicDir,searchSubdirs):
     return songs #Returns a non-empty array of songs
         
     
+def loadPronunciations(pronunciationFile):#loads words to replace with their phonetic spelling into a dictionary
+    pronunciations={}#defines empty dictionary
+    with open(pronunciationFile, 'r') as file:
+        reader = csv.reader(file)#starts csv reader
+        for row in reader[1:]:#Skips the title row
+            pronunciations[row[0]] = row[1]
+    return pronunciations #returns dictionary
+
+def replacePronunciations(transitionText,pronunciations):#Replaces the keys (Original spelling) with phonetic spelling
+    for key in pronunciations.keys:#loops through all definitions of replacables
+        if key in transitionText:#if a word to replace has been found
+            print("Replacing",key,"with",pronunciations[key])#warns user
+            transitionText=transitionText.replace(key,pronunciations[key])#replaces bad pronunciation with phonetic spelling
+    return transitionText#returns regardless of if anything was replaced
 
 #_____main_____
 cwd=os.getcwd() #dir containing this script (And hopefully the others)
@@ -92,6 +107,7 @@ print("Search subdirs?:",searchSubdirs)
 #vars/setup
 transitionsFile=cwd+"/transitions.txt"
 responsesFile=cwd+"/responses.txt"
+pronunciationsFile=cwd+"/pronunciations.csv"
 audioExtensions=[".mp3",".wav"]#array of valid audio file extensions
 cleanupFiles=[]#files to delete after processing
 resetTxts()#clears text files
@@ -130,6 +146,7 @@ print("_"*30)
 print("Generating Audio")
 audioModel, audioProcessor = ai_dj_audio.setupAudioModel()#can use ai_dj_audio as a lib as no memory leak issue
 
+pronunciations=loadPronunciations(pronunciationsFile)
 for response in (open(responsesFile,"r").readlines()):#for each line of ai generated text
     response=response.split("|")#lines also contain song names in format: songX | songY | generatedText | audioFileName
     songX=response[0]
@@ -137,6 +154,7 @@ for response in (open(responsesFile,"r").readlines()):#for each line of ai gener
     transitionText=response[2]
     audioFileName=response[3]
     
+    transitionText=replacePronunciations(transitionText,pronunciations)
     print(songX,"->",songY)
     print("Transition Text:",transitionText,"\n")
     cleanupFiles.append(ai_dj_audio.generateAudio(transitionText,songX,songY,musicDir,audioModel,audioProcessor,voicePreset))#generates audio as mp3, and appends it to be deleted later
